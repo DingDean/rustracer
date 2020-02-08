@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vec3 {
@@ -187,6 +187,14 @@ impl DivAssign<f64> for Vec3 {
     }
 }
 
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        -1.0 * self
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Vec3;
@@ -316,5 +324,12 @@ mod test {
         let rhs = Vec3::new(0.0, 1.0, 0.0);
         let rst = Vec3::new(0.0, 0.0, 1.0);
         assert_eq!(lhs.cross(rhs), rst);
+    }
+
+    #[test]
+    fn neg_test() {
+        let lhs = Vec3::all(1.0);
+        let rst = Vec3::all(-1.0);
+        assert_eq!(-lhs, rst);
     }
 }

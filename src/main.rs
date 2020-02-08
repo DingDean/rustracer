@@ -1,6 +1,6 @@
 mod camera;
 mod hittable;
-mod meterial;
+mod materials;
 mod ray;
 mod util;
 mod vec3;
@@ -15,11 +15,16 @@ use vec3::Vec3;
 const WIDTH: usize = 200;
 const HEIGHT: usize = 100;
 
-fn color(r: &Ray, world: &World, rng: &mut ThreadRng) -> Vec3 {
+fn color(r: &Ray, world: &World, depth: u32) -> Vec3 {
     if let Some(record) = world.hit(r, 0.001, std::f64::MAX) {
-        let target = record.p + record.n + util::random_in_unit_sphere(rng);
-        let randray = Ray::new(record.p, target - record.p);
-        0.5 * color(&randray, world, rng)
+        if depth >= 50 {
+            return Vec3::zeros();
+        }
+        if let Some(scatter) = record.material.scatter(r, &record) {
+            scatter.attenuation * color(&scatter.ray, world, depth + 1)
+        } else {
+            Vec3::zeros()
+        }
     } else {
         // blue background
         let unit_direction = r.direction.make_unit_vector();
@@ -44,8 +49,36 @@ fn main() {
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
     let mut world = World::new();
-    world.add(Box::new(Sphere::new(0.0, 0.0, -1.0, 0.5)));
-    world.add(Box::new(Sphere::new(0.0, -100.5, -1.0, 100.0)));
+    world.add(Box::new(Sphere::new(
+        0.0,
+        0.0,
+        -1.0,
+        0.5,
+        materials::Lambertian::new(0.8, 0.3, 0.3),
+    )));
+    world.add(Box::new(Sphere::new(
+        0.0,
+        -100.5,
+        -1.0,
+        100.0,
+        materials::Lambertian::new(0.8, 0.8, 0.0),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        1.0,
+        0.0,
+        -1.0,
+        0.5,
+        materials::Metal::new(0.8, 0.6, 0.2, 0.3),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        -1.0,
+        0.0,
+        -1.0,
+        0.5,
+        materials::Dielectrics::new(1.5),
+    )));
 
     let camera = Camera::default();
     let mut rng = thread_rng();
@@ -58,7 +91,7 @@ fn main() {
                 let v: f64 = (j as f64 + rng.gen_range(0.0, 1.0)) / HEIGHT as f64;
                 let u: f64 = (i as f64 + rng.gen_range(0.0, 1.0)) / WIDTH as f64;
                 let ray = camera.get_ray(u, v);
-                let lc = color(&ray, &world, &mut rng);
+                let lc = color(&ray, &world, 0);
                 c += lc;
             }
             c /= ns as f64;

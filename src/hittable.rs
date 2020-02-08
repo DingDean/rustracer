@@ -1,27 +1,35 @@
+use crate::materials::Materialable;
 use crate::{ray::Ray, util, vec3::Vec3};
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-pub struct HitRecord {
+/// HitRecord describe the following property of ray's interaction with the world:    
+/// 1. the closest intersection point of a ray
+/// 2. the normal of the intersection
+/// 3. the material of the intersecting object
+pub struct HitRecord<'a> {
     pub t: f64,
     /// the intersection vector
     pub p: Vec3,
     /// normal
     pub n: Vec3,
+    pub material: &'a Box<dyn Materialable>,
 }
 
 pub struct Sphere {
     center: Vec3,
     radius: f64,
+    material: Box<dyn Materialable>,
 }
 
 impl Sphere {
-    pub fn new(x: f64, y: f64, z: f64, r: f64) -> Sphere {
+    pub fn new(x: f64, y: f64, z: f64, r: f64, m: Box<dyn Materialable>) -> Sphere {
         Sphere {
             center: Vec3::new(x, y, z),
             radius: r,
+            material: m,
         }
     }
 }
@@ -52,7 +60,12 @@ impl Hittable for Sphere {
                 Some(t) => {
                     let p = r.point_at_parameter(t);
                     let n = (p - self.center) / self.radius;
-                    Some(HitRecord { t, p, n })
+                    Some(HitRecord {
+                        t,
+                        p,
+                        n,
+                        material: &self.material,
+                    })
                 }
                 None => None,
             }
