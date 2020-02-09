@@ -1,36 +1,57 @@
 use crate::ray::Ray;
+use crate::util;
 use crate::vec3::Vec3;
+use std::f64::consts::PI;
 
 pub struct Camera {
     lower_left_corner: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
     origin: Vec3,
+    u: Vec3,
+    v: Vec3,
+    lens_radius: f64,
 }
 
 impl Camera {
-    pub fn new(lower_left_corner: Vec3, horizontal: Vec3, vertical: Vec3, origin: Vec3) -> Camera {
-        Camera {
-            lower_left_corner,
-            horizontal,
-            vertical,
-            origin,
-        }
-    }
+    pub fn new(
+        lookfrom: Vec3,
+        lookat: Vec3,
+        vup: Vec3,
+        vfov: f64,
+        aspect: f64,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Camera {
+        let lens_radius = aperture / 2.0;
 
-    pub fn default() -> Camera {
+        let theta = vfov * PI / 180.0;
+        let half_height = (0.5 * theta).tan() * focus_dist;
+        let half_width = aspect * half_height;
+
+        let w = (lookfrom - lookat).make_unit_vector();
+        let u = vup.cross(w).make_unit_vector();
+        let v = u.cross(w);
+
+        let llc = lookfrom - half_width * u - half_height * v - focus_dist * w;
+
         Camera {
-            lower_left_corner: Vec3::new(-2.0, -1.0, -1.0),
-            horizontal: Vec3::new(4.0, 0.0, 0.0),
-            vertical: Vec3::new(0.0, 2.0, 0.0),
-            origin: Vec3::zeros(),
+            lower_left_corner: llc,
+            horizontal: 2.0 * half_width * u,
+            vertical: 2.0 * half_height * v,
+            origin: lookfrom,
+            u,
+            v,
+            lens_radius,
         }
     }
 
     pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+        let rd = self.lens_radius * util::random_in_unit_disk();
+        let offset = rd.x * self.u + rd.y * self.v;
         Ray::new(
-            self.origin,
-            self.lower_left_corner + u * self.horizontal + v * self.vertical,
+            self.origin + offset,
+            self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin - offset,
         )
     }
 }

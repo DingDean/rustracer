@@ -80,7 +80,19 @@ fn main() {
         materials::Dielectrics::new(1.5),
     )));
 
-    let camera = Camera::default();
+    let aspect_ratio = WIDTH as f64 / HEIGHT as f64;
+    let eye = Vec3::new(3.0, 3.0, 2.0);
+    let lookto = Vec3::new(0.0, 0.0, -1.0);
+    let focus_dist = (eye - lookto).length();
+    let camera = Camera::new(
+        eye,
+        lookto,
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        aspect_ratio,
+        2.0,
+        focus_dist,
+    );
     let mut rng = thread_rng();
     let ns = 100;
 

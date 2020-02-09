@@ -11,6 +11,19 @@ pub fn random_double() -> f64 {
     x
 }
 
+pub fn random_in_unit_disk() -> Vec3 {
+    let mut rng: ThreadRng = thread_rng();
+    loop {
+        let x: f64 = rng.gen_range(0.0, 1.0);
+        let y: f64 = rng.gen_range(0.0, 1.0);
+        let z: f64 = 0.0;
+        let p = 2.0 * Vec3::new(x, y, z) - Vec3::new(1.0, 1.0, 0.0);
+        if p.length() < 1.0 {
+            break p;
+        }
+    }
+}
+
 pub fn random_in_unit_sphere() -> Vec3 {
     let mut rng: ThreadRng = thread_rng();
     loop {
