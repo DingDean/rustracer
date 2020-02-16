@@ -49,7 +49,7 @@ impl Vec3 {
     pub fn cross(&self, rhs: Vec3) -> Vec3 {
         Vec3 {
             x: self.y * rhs.z - self.z * rhs.y,
-            y: self.x * rhs.z - self.z * rhs.x,
+            y: self.z * rhs.x - self.x * rhs.z,
             z: self.x * rhs.y - self.y * rhs.x,
         }
     }
@@ -331,5 +331,13 @@ mod test {
         let lhs = Vec3::all(1.0);
         let rst = Vec3::all(-1.0);
         assert_eq!(-lhs, rst);
+    }
+
+    #[test]
+    fn dot_cross_test() {
+        let v = Vec3::new(2.0, 3.0, 1.0);
+        let u = Vec3::new(1.0, 2.0, 2.0);
+        let t = v.cross(u);
+        assert_eq!(t.dot(u), 0.0);
     }
 }

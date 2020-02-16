@@ -5,13 +5,12 @@ pub fn is_between(t: f64, min: f64, max: f64) -> bool {
     t < max && t > min
 }
 
-pub fn random_double() -> f64 {
-    let mut rng: ThreadRng = thread_rng();
+pub fn random_double(rng: &mut ThreadRng) -> f64 {
     let x: f64 = rng.gen_range(0.0, 1.0);
     x
 }
 
-pub fn random_in_unit_disk() -> Vec3 {
+pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Vec3 {
     let mut rng: ThreadRng = thread_rng();
     loop {
         let x: f64 = rng.gen_range(0.0, 1.0);
@@ -24,8 +23,7 @@ pub fn random_in_unit_disk() -> Vec3 {
     }
 }
 
-pub fn random_in_unit_sphere() -> Vec3 {
-    let mut rng: ThreadRng = thread_rng();
+pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Vec3 {
     loop {
         let x: f64 = rng.gen_range(0.0, 1.0);
         let y: f64 = rng.gen_range(0.0, 1.0);

@@ -4,6 +4,7 @@ use crate::util;
 use crate::vec3::Vec3;
 
 use super::material::{Materialable, Scatter};
+use rand::prelude::*;
 
 pub struct Dielectrics {
     /// reflected index
@@ -23,7 +24,7 @@ fn schlick(cosine: f64, ref_index: f64) -> f64 {
 }
 
 impl Materialable for Dielectrics {
-    fn scatter(&self, r: &Ray, hit: &HitRecord) -> Option<Scatter> {
+    fn scatter(&self, r: &Ray, hit: &HitRecord, rng: &mut ThreadRng) -> Option<Scatter> {
         let (normal, ni_over_nt, cosine) = {
             if r.direction.dot(hit.n) > 0.0 {
                 (
@@ -58,7 +59,7 @@ impl Materialable for Dielectrics {
                 (None, 1.0)
             };
 
-        if util::random_double() < prob {
+        if util::random_double(rng) < prob {
             reflected
         } else {
             refracted
