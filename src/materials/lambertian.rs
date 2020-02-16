@@ -4,6 +4,7 @@ use crate::util;
 use crate::vec3::Vec3;
 
 use super::material::{Materialable, Scatter};
+use rand::prelude::*;
 
 pub struct Lambertian {
     albedo: Vec3,
@@ -18,8 +19,8 @@ impl Lambertian {
 }
 
 impl Materialable for Lambertian {
-    fn scatter(&self, _r: &Ray, hit_record: &HitRecord) -> Option<Scatter> {
-        let target = hit_record.p + hit_record.n + util::random_in_unit_sphere();
+    fn scatter(&self, _r: &Ray, hit_record: &HitRecord, rng: &mut ThreadRng) -> Option<Scatter> {
+        let target = hit_record.p + hit_record.n + util::random_in_unit_sphere(rng);
         Some(Scatter {
             ray: Ray::new(hit_record.p, target - hit_record.p),
             attenuation: self.albedo,

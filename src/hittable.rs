@@ -1,7 +1,7 @@
 use crate::materials::Materialable;
 use crate::{ray::Ray, util, vec3::Vec3};
 
-pub trait Hittable {
+pub trait Hittable: Send + Sync {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
@@ -25,12 +25,12 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(x: f64, y: f64, z: f64, r: f64, m: Box<dyn Materialable>) -> Sphere {
-        Sphere {
+    pub fn new(x: f64, y: f64, z: f64, r: f64, m: Box<dyn Materialable>) -> Box<Sphere> {
+        Box::new(Sphere {
             center: Vec3::new(x, y, z),
             radius: r,
             material: m,
-        }
+        })
     }
 }
 
@@ -90,6 +90,8 @@ impl World {
         let mut closest_so_far = t_max;
         let mut record: Option<HitRecord> = None;
 
+        // improvement needed:
+        // not every mesh has to be traversed
         for mesh in &self.meshes {
             if let Some(temp) = mesh.hit(r, t_min, closest_so_far) {
                 closest_so_far = temp.t;

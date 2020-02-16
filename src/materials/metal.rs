@@ -4,6 +4,7 @@ use crate::util;
 use crate::vec3::Vec3;
 
 use super::material::{Materialable, Scatter};
+use rand::prelude::*;
 
 pub struct Metal {
     fuzzy: f64,
@@ -20,12 +21,12 @@ impl Metal {
 }
 
 impl Materialable for Metal {
-    fn scatter(&self, r: &Ray, hit: &HitRecord) -> Option<Scatter> {
+    fn scatter(&self, r: &Ray, hit: &HitRecord, rng: &mut ThreadRng) -> Option<Scatter> {
         let v = r.direction.make_unit_vector();
         let reflected = util::reflect(v, hit.n);
         let ray = Ray::new(
             hit.p,
-            reflected + self.fuzzy * util::random_in_unit_sphere(),
+            reflected + self.fuzzy * util::random_in_unit_sphere(rng),
         );
         if ray.direction.dot(hit.n) > 0.0 {
             Some(Scatter {
